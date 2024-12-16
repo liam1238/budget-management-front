@@ -1,0 +1,19 @@
+.detail-head {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 32px;
+    border: 1px solid #7E4CFF;
+    border-radius: 8px;
+    width: 60%;
+    justify-self: center
+}
+
+.detail-head h1 {
+    color: #7E4CFF;
+}
+
+.btn {
+    margin: 16px 0 !important;
+}
