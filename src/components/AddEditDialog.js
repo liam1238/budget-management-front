@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Dialog, Button, TextField } from '@mui/material';
 
@@ -18,7 +18,12 @@ const AddEditDialog = ({
         }
     }, [formData, open, reset]);
 
-    const onSubmit = (data) => {
+    // Wrapped in useCallback to avoid unnecessary re-creations of the function 
+    const onSubmit = useCallback((data) => {
+        if (!data.description || !data.amount || !data.date) {
+            alert('All fields are required!');
+            return;
+        }
         if (formData.type === 'income') {
             handleIncomeSubmit(data, isEditing);
         } else {
@@ -26,11 +31,11 @@ const AddEditDialog = ({
         }
         reset(); // Reset the form after submission
         handleClose();
-    };
+    }, [formData.type, handleIncomeSubmit, handleExpenseSubmit, isEditing, reset, handleClose]);
 
     return (
         <Dialog open={open} onClose={handleClose}>
-            <form onSubmit={handleSubmit(onSubmit)} style={{ padding: '20px' }}>
+            <form className='dialog-form' onSubmit={handleSubmit(onSubmit)}>
                 <TextField
                     {...register('description')}
                     label="Description"
@@ -50,6 +55,7 @@ const AddEditDialog = ({
                     label="Date"
                     fullWidth
                     margin="normal"
+                    InputLabelProps={{ shrink: true }} // fix bug in the view
                 />
                 <div className='btns-div'>
                     <Button type="submit" variant="contained" color="primary">{isEditing ? 'Update' : 'Add'}</Button>

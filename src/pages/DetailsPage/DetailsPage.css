@@ -4,14 +4,14 @@
     justify-content: center;
     align-items: center;
     margin-top: 32px;
-    border: 1px solid #7E4CFF;
+    border: 1px solid var(--primary-color);
     border-radius: 8px;
     width: 60%;
     justify-self: center
 }
 
 .detail-head h1 {
-    color: #7E4CFF;
+    color: var(--primary-color);
 }
 
 .btn {

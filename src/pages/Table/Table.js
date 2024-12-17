@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { CircularProgress, Alert, Button, TablePagination, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
+import { CircularProgress, Alert } from '@mui/material';
+import DataTable from '../../components/DataTable';
+import SortSelect from '../../components/SortSelect';
 import { Incomes } from '../../utils/incomes';
 import { Expenses } from '../../utils/expenses';
 import AddEditDialog from '../../components/AddEditDialog';
-import ItemTable from '../../components/ItemTable';
 import './Table.css';
 
 const TableScreen = () => {
@@ -15,7 +16,7 @@ const TableScreen = () => {
 
     const [expensePage, setExpensePage] = useState(0); // Current page for expenses
     const [incomePage, setIncomePage] = useState(0); // Current page for incomes
-    const rowsPerPage = 5; // Rows per page
+    const rowsPerPage = 5;
     const [totalIncomes, setTotalIncomes] = useState(0); // Total incomes count
     const [totalExpenses, setTotalExpenses] = useState(0); // Total expenses count
 
@@ -29,7 +30,7 @@ const TableScreen = () => {
         type: '',
     });
 
-    const [sortOption, setSortOption] = useState('id'); // Sorting option (by id or description)
+    const [sortOption, setSortOption] = useState('id'); // Sorting option (by id / description / amount)
 
     const location = useLocation(); // Get current URL
     const isExpenseDetailRoute = location.pathname.includes('/table/expense/');
@@ -44,9 +45,11 @@ const TableScreen = () => {
             const expenseOffset = expensePage * rowsPerPage;
             const incomeOffset = incomePage * rowsPerPage;
     
-            // Fetch paginated data from backend
-            const fetchedIncomes = await Incomes.getIncomes(rowsPerPage, incomeOffset, sortOption);
-            const fetchedExpenses = await Expenses.getExpenses(rowsPerPage, expenseOffset, sortOption);
+            // Fetch paginated data from the backend
+            const [fetchedIncomes, fetchedExpenses] = await Promise.all([
+                Incomes.getIncomes(rowsPerPage, incomeOffset, sortOption),
+                Expenses.getExpenses(rowsPerPage, expenseOffset, sortOption),
+            ]);
     
             // Update states with fresh data (no duplicates)
             setIncomes(fetchedIncomes.data);
@@ -68,21 +71,19 @@ const TableScreen = () => {
         getExpensesAndIncomes();
     }, [getExpensesAndIncomes]);
 
-    // Handle pagination
-    const handleExpensePageChange = (_, newPage) => setExpensePage(newPage);
-    const handleIncomePageChange = (_, newPage) => setIncomePage(newPage);
-
-    // Handle dialog open/close
-    const handleClickOpen = (item = null, type = '') => {
+    // Handle dialog open 
+    const handleDialogOpen = (item = null, type = '') => {
         setIsEditing(!!item);
         setFormData(item || { id: '', description: '', amount: '', date: '', type });
         setOpen(true);
     };
-
-    const handleClose = () => setOpen(false);
+    
+    const handleDialogClose = () => setOpen(false); // Handle dialog open close
 
     const handleIncomeSubmit = async (formData, isEditing) => {
         try {
+            setLoading(true);
+
             if (isEditing) {
                 await Incomes.updateIncome(formData.id, formData);
     
@@ -99,11 +100,15 @@ const TableScreen = () => {
             }
         } catch (e) {
             setError(e.message);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleExpenseSubmit = async (formData, isEditing) => {
         try {
+            setLoading(true);
+
             if (isEditing) {
                 await Expenses.updateExpense(formData.id, formData);
     
@@ -120,6 +125,8 @@ const TableScreen = () => {
             }
         } catch (e) {
             setError(e.message);
+        } finally {
+            setLoading(false);
         }
     };    
 
@@ -153,70 +160,38 @@ const TableScreen = () => {
             )}
             {!loading && !isExpenseDetailRoute && !isIncomeDetailRoute && (
                 <>
-                <FormControl className='sort-select'>
-                    <InputLabel>Sort By</InputLabel>
-                    <Select
-                        value={sortOption}
-                        onChange={handleSortChange}
-                        label="Sort By"
-                    >
-                        <MenuItem value="id">By ID</MenuItem>
-                        <MenuItem value="description">By Description</MenuItem>
-                        <MenuItem value="amount">By Amount</MenuItem>
-                    </Select>
-                </FormControl>
+                <SortSelect sortOption={sortOption} onSortChange={handleSortChange} />
                 <div className="tables-container">
-                    <h1>Incomes</h1>
-                    <Button
-                        className="add-button"
-                        variant="contained"
-                        onClick={() => handleClickOpen(null, 'income')}
-                    >
-                        Add Income
-                    </Button>
-                    <ItemTable
+                    <DataTable
+                        title="Incomes"
                         data={incomes}
-                        type="income"
-                        onEdit={(item) => handleClickOpen(item, 'income')}
-                        onDelete={(id) => handleDelete(id, 'income')}
-                    />
-                    <TablePagination
-                        rowsPerPageOptions={[5]}
-                        component="div"
-                        count={totalIncomes}
+                        totalItems={totalIncomes}
                         rowsPerPage={rowsPerPage}
                         page={incomePage}
-                        onPageChange={handleIncomePageChange}
+                        onPageChange={(_, page) => setIncomePage(page)}
+                        onAdd={() => handleDialogOpen(null, 'income')}
+                        onEdit={(item) => handleDialogOpen(item, 'income')}
+                        onDelete={(id) => handleDelete(id, 'income')}
+                        type="income"
                     />
-
-                    <h1>Expenses</h1>
-                    <Button
-                        className="add-button"
-                        variant="contained"
-                        onClick={() => handleClickOpen(null, 'expense')}
-                    >
-                        Add Expense
-                    </Button>
-                    <ItemTable
+                    <DataTable
+                        title="Expenses"
                         data={expenses}
-                        type="expense"
-                        onEdit={(item) => handleClickOpen(item, 'expense')}
-                        onDelete={(id) => handleDelete(id, 'expense')}
-                    />
-                    <TablePagination
-                        rowsPerPageOptions={[5]}
-                        component="div"
-                        count={totalExpenses}
+                        totalItems={totalExpenses}
                         rowsPerPage={rowsPerPage}
                         page={expensePage}
-                        onPageChange={handleExpensePageChange}
+                        onPageChange={(_, page) => setExpensePage(page)}
+                        onAdd={() => handleDialogOpen(null, 'expense')}
+                        onEdit={(item) => handleDialogOpen(item, 'expense')}
+                        onDelete={(id) => handleDelete(id, 'expense')}
+                        type="expense"
                     />
                 </div>
                 </>
             )}
             <AddEditDialog
                 open={open}
-                handleClose={handleClose}
+                handleClose={handleDialogClose}
                 isEditing={isEditing}
                 formData={formData}
                 handleIncomeSubmit={handleIncomeSubmit}
