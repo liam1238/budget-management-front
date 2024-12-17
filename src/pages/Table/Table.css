@@ -7,13 +7,13 @@
 }
 
 .table-container {
-    border: 1px solid #7E4CFF;
+    border: 1px solid var(--primary-color);
     border-top: none;
     border-radius: 8px;
 }
 
 .table-row-head {
-    background-color: #7E4CFF;
+    background-color: var(--primary-color);
     text-align-last: center;
 }
 
@@ -33,10 +33,6 @@
 .table-col {
     border: 1px solid;
     border-bottom: 1px solid !important;
-}
-
-.add-button {
-    margin-bottom: 16px !important;
 }
 
 .table-head {

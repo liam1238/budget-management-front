@@ -3,7 +3,12 @@ import { Budget } from '../../utils/budget';
 import { Alert } from '@mui/material';
 import { Link } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
+import { Bar, Pie } from 'react-chartjs-2'; // Import chart components
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
 import './Dashboard.css';
+
+// Register chart components
+ChartJS.register(ArcElement, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
 const Dashboard = () => {
     const [loading, setLoading] = useState(false);
@@ -36,6 +41,29 @@ const Dashboard = () => {
       getBalance();
     }, [getBalance]);
 
+    const barChartData = {
+        labels: ['Income', 'Expenses', 'Balance'],
+        datasets: [
+            {
+                label: 'Amount ($)',
+                data: [data.totalIncome, data.totalExpenses, data.balance],
+                backgroundColor: ['#4CAF50', '#F44336', '#2196F3'],
+                borderColor: ['#388E3C', '#D32F2F', '#1976D2'],
+                borderWidth: 1,
+            },
+        ],
+    };
+
+    const pieChartData = {
+        labels: ['Income', 'Expenses'],
+        datasets: [
+            {
+                data: [data.totalIncome, data.totalExpenses],
+                backgroundColor: ['#4CAF50', '#F44336'],
+            },
+        ],
+    };
+
     return (
         <>
             {error && <Alert severity="error">{error?.toString()}</Alert>}
@@ -57,8 +85,32 @@ const Dashboard = () => {
                             <h2>${data.balance}</h2>
                         </div>
                     </div>
+
+                    <div className='charts'>
+                        <div className="chart-container">
+                            <h3>Income vs Expenses</h3>
+                            <Bar 
+                                data={barChartData} 
+                                options={{ responsive: true, maintainAspectRatio: false }} 
+                                width={300} 
+                                height={200} 
+                            />                    
+                        </div>
+                        <div className="chart-container">
+                            <h3>Income Distribution</h3>
+                            <Pie 
+                                data={pieChartData} 
+                                options={{ responsive: true, maintainAspectRatio: false }} 
+                                width={300} 
+                                height={200} 
+                            />
+                        </div>
+                    </div>
+
                     <div className='to-tables'>
-                        <Link to={'/table'}><h3>Click here to see the incomes and expanses tables</h3></Link>
+                        <Link to={'/table'}>
+                            <h3>Click here to see the incomes and expenses tables</h3>
+                        </Link>
                     </div>
                 </div>
             }

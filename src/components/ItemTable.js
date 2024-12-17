@@ -1,6 +1,6 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from '@mui/material';
-import { Link } from 'react-router-dom';  // Import Link
+import { Link } from 'react-router-dom';
 
 const ItemTable = ({ data, onEdit, onDelete, type }) => (
     <TableContainer className="table-container">
