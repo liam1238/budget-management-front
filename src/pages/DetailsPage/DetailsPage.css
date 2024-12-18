@@ -1,19 +1,19 @@
 .detail-head {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin-top: 32px;
-    border: 1px solid var(--primary-color);
-    border-radius: 8px;
-    width: 60%;
-    justify-self: center
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 32px;
+  border: 1px solid var(--primary-color);
+  border-radius: 8px;
+  width: 60%;
+  justify-self: center;
 }
 
 .detail-head h1 {
-    color: var(--primary-color);
+  color: var(--primary-color);
 }
 
 .btn {
-    margin: 16px 0 !important;
+  margin: 16px 0 !important;
 }
